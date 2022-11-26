@@ -1,0 +1,36 @@
+Only in linux-5.19.17-uncompiled_patched: .config
+diff -ru linux-5.19.17/arch/x86/entry/syscalls/syscall_64.tbl linux-5.19.17-uncompiled_patched/arch/x86/entry/syscalls/syscall_64.tbl
+--- linux-5.19.17/arch/x86/entry/syscalls/syscall_64.tbl	2022-10-24 13:28:32.000000000 +0530
++++ linux-5.19.17-uncompiled_patched/arch/x86/entry/syscalls/syscall_64.tbl	2022-11-22 00:20:05.606282901 +0530
+@@ -372,6 +372,7 @@
+ 448	common	process_mrelease	sys_process_mrelease
+ 449	common	futex_waitv		sys_futex_waitv
+ 450	common	set_mempolicy_home_node	sys_set_mempolicy_home_node
++451	common	twodcopy_system_call	sys_twodcopy
+ 
+ #
+ # Due to a historical design error, certain syscalls are numbered differently
+diff -ru linux-5.19.17/kernel/sys.c linux-5.19.17-uncompiled_patched/kernel/sys.c
+--- linux-5.19.17/kernel/sys.c	2022-10-24 13:28:32.000000000 +0530
++++ linux-5.19.17-uncompiled_patched/kernel/sys.c	2022-11-22 00:20:47.282912058 +0530
+@@ -2787,4 +2787,20 @@
+ 		return -EFAULT;
+ 	return 0;
+ }
++
++SYSCALL_DEFINE4(twodcopy, float*, source, float*, destination, int, l1, int, l2){
++
++	float buffer[80];
++
++	if(__copy_from_user(buffer, source, sizeof(float)*l1*l2)){
++		return -EFAULT;
++	}
++
++	if(__copy_to_user(destination, buffer, sizeof(float)*l1*l2)){
++		return -EFAULT;
++	}
++
++	return 0;
++}
++
+ #endif /* CONFIG_COMPAT */
